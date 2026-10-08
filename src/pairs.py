@@ -1,4 +1,5 @@
 from pathlib import Path
+from vocabulary import build_vocabulary , convert_pairs_to_ids
 from preprocessing import read_corpus, normalize_text, split_into_sentences, tokenize
 def generate_center_context(tokenized_sentences, window_size):
     pairs = []
@@ -27,10 +28,20 @@ if __name__ == "__main__":
         tokens = tokenize(sentence)
         tokenized_sentences.append(tokens)
 
+    vocabulary = build_vocabulary(tokenized_sentences)
+
     pairs = generate_center_context(tokenized_sentences, window_size=2)
 
+    indexed_pairs = convert_pairs_to_ids(pairs, vocabulary)
+
     print(f"Number of sentences: {len(tokenized_sentences)}")
+    print(f"Vocabulary size: {len(vocabulary)}")
     print(f"Number of center-context pairs: {len(pairs)}")
 
+    print("\nFirst 20 word pairs:")
     for pair in pairs[:20]:
+        print(pair)
+
+    print("\nFirst 20 ID pairs:")
+    for pair in indexed_pairs[:20]:
         print(pair)
