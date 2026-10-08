@@ -151,9 +151,6 @@ def train_one_epoch(E, U, indexed_pairs, learning_rate):
 
 
 def train(E, U, indexed_pairs, learning_rate, num_epochs):
-    """Returns loss_history. loss_history[0] is the loss BEFORE training,
-    loss_history[n] is the loss after epoch n (all on the same pairs, at
-    fixed weights)."""
     loss_history = []
 
     initial_loss = compute_dataset_loss(E, U, indexed_pairs)
@@ -181,7 +178,7 @@ def cosine_similarity(vector_a, vector_b):
 
 
 def find_nearest_neighbors(word, vocabulary, E, top_n):
-    """Returns None for an unknown word."""
+    
     word_id = find_word_id(vocabulary, word)
 
     if word_id == -1:
@@ -236,11 +233,6 @@ def average_similarity(results):
         return None
     return sum(similarity for _, _, similarity in results) / len(results)
 
-
-# ---------------------------------------------------------------------------
-# Optional: save / load as JSON
-# ---------------------------------------------------------------------------
-
 def save_model(path, vocabulary, E, U):
     data = {"vocabulary": vocabulary, "E": E, "U": U}
     with open(path, "w", encoding="utf-8") as file:
@@ -252,16 +244,7 @@ def load_model(path):
         data = json.load(file)
     return data["vocabulary"], data["E"], data["U"]
 
-
-# ---------------------------------------------------------------------------
-# Optional: numerical gradient check
-# ---------------------------------------------------------------------------
-
 def numerical_gradient_check(E, U, center_id, target_id, epsilon=0.00001):
-    """Compares analytic grad_h and grad_U with
-    [L(theta + eps) - L(theta - eps)] / (2 eps). Returns the largest
-    absolute difference found. Restores E and U afterwards."""
-
     def pair_loss():
         scores = calculate_scores(E[center_id], U)
         loss, _ = cross_entropy_loss(scores, target_id)
@@ -298,11 +281,6 @@ def numerical_gradient_check(E, U, center_id, target_id, epsilon=0.00001):
             max_difference = max(max_difference, abs(numeric - analytic_U[k][j]))
 
     return max_difference
-
-
-# ---------------------------------------------------------------------------
-# Required checks (tolerance 0.00001), using the tiny "cats eat food" example
-# ---------------------------------------------------------------------------
 
 def close(a, b, tolerance=TOLERANCE):
     return abs(a - b) <= tolerance
@@ -421,11 +399,6 @@ def run_checks():
     print(f"\n{sum(results)}/{len(results)} checks passed.\n")
     return all(results)
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def find_corpus_path():
     here = Path(__file__).parent
     candidates = [
@@ -460,10 +433,10 @@ if __name__ == "__main__":
     num_epochs = 20
     window_size = 2
 
-    print("=== Implementation checks ===")
+    print(" Implementation checks")
     run_checks()
 
-    print("=== Loading corpus ===")
+    print("Loading corpus")
     tokenized_sentences, vocabulary, indexed_pairs = load_training_data(window_size)
     vocab_size = len(vocabulary)
 
@@ -476,18 +449,18 @@ if __name__ == "__main__":
 
     E, U = initialize_parameters(vocab_size, embedding_dim)
 
-    print("=== Training ===")
+    print("Training")
     loss_history = train(E, U, indexed_pairs, learning_rate, num_epochs)
 
-    # Cosine sanity checks
-    print("\n=== Cosine sanity checks ===")
+    # Cosine  checks
+    print("\nCosine  checks")
     print(cosine_similarity([1, 1], [2, 2]))    # 1
     print(cosine_similarity([1, 0], [0, 1]))    # 0
     print(cosine_similarity([1, 0], [-1, 0]))   # -1
-    print(cosine_similarity([0, 0], [1, 2]))    # 0 (zero norm, no crash)
+    print(cosine_similarity([0, 0], [1, 2]))    # 0
 
     # Five query words, three nearest vectors each (plus one unknown word)
-    print("\n=== Nearest neighbors ===")
+    print("\n Nearest neighbors")
     query_words = ["bosonni", "mukkeen", "lafa", "qilleensa", "manca’iinsa", "computer"]
     print_nearest_neighbors(query_words, vocabulary, E, top_n=3)
 
@@ -505,12 +478,12 @@ if __name__ == "__main__":
         ("bosona", "waajjira"),
     ]
 
-    print("\n=== Related pairs ===")
+    print("\nRelated pairs")
     related_results = evaluate_word_pairs(related_pairs, vocabulary, E)
     for word_a, word_b, similarity in related_results:
         print(f"{word_a} - {word_b}: {similarity:.4f}")
 
-    print("\n=== Unrelated pairs ===")
+    print("\n Unrelated pairs")
     unrelated_results = evaluate_word_pairs(unrelated_pairs, vocabulary, E)
     for word_a, word_b, similarity in unrelated_results:
         print(f"{word_a} - {word_b}: {similarity:.4f}")
